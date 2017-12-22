@@ -7,8 +7,21 @@
 
 import scrapy
 
+class ArticleItem(scrapy.Item):
+    title = scrapy.Field()
+    author = scrapy.Field()
+    category = scrapy.Field()
+    source = scrapy.Field()
+    content = scrapy.Field()
+    pass
+
+
 
 class MagazineItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
+    url = scrapy.Field()
+    title = scrapy.Field()
+    img = scrapy.Field()
+    year = scrapy.Field()
+    number = scrapy.Field()
+    articleList = scrapy.Field()
     pass
