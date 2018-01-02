@@ -5,6 +5,7 @@ from magazine.items import ArticleItem
 
 from scrapy.http import Request
 
+
 class QuotesSpider(scrapy.Spider):
     name = "duzhe"
 
@@ -27,18 +28,22 @@ class QuotesSpider(scrapy.Spider):
         # book.year = title
         # book.number = title
         book['img'] = response.xpath('//div[contains(@class,"center")]/img/@src').extract()
+        book['articleList'] = list()
 
         for article in response.xpath('//td/a/@href').extract():
-            yield Request(response.urljoin(article), meta={'book': book}, callback=self.parse_article)
+            return Request(response.urljoin(article), meta={'book': book}, callback=self.parse_article)
 
-        # yield {
-        #         'title': response.xpath('//td[@class="title"]/a/text()').extract(),
-        #         'author': response.xpath('//td[@class="author"]/text()').extract(),
-        #         'source': response.xpath('//td[@class="source"]/text()').extract(),
-        #     }
+            # yield {
+            #         'title': response.xpath('//td[@class="title"]/a/text()').extract(),
+            #         'author': response.xpath('//td[@class="author"]/text()').extract(),
+            #         'source': response.xpath('//td[@class="source"]/text()').extract(),
+            #     }
 
     def parse_article(self, response):
         book = response.meta['book']
+
+        articleList = list(book['articleList'])
+
         article = ArticleItem()
         article['title'] = response.xpath('//h1/text()').extract()
         article['author'] = response.xpath("//span[@id='pub_date']/text()").extract()
@@ -46,7 +51,6 @@ class QuotesSpider(scrapy.Spider):
         article['source'] = response.xpath("//span[@id='pub_date']/text()").extract()
         article['content'] = response.xpath("//p").extract()
 
-        article.append(article)
-        book['articleList'] = article
+        articleList.append(article)
+        book['articleList'] =articleList
         return book
-

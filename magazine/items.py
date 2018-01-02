@@ -7,7 +7,15 @@
 
 import scrapy
 
-class ArticleItem(scrapy.Item):
+class MagazineItem(scrapy.Item):
+    url = scrapy.Field()
+    title = scrapy.Field()
+    img = scrapy.Field()
+    year = scrapy.Field()
+    number = scrapy.Field()
+    pass
+
+class ArticleItem(MagazineItem):
     title = scrapy.Field()
     author = scrapy.Field()
     category = scrapy.Field()
@@ -17,11 +25,3 @@ class ArticleItem(scrapy.Item):
 
 
 
-class MagazineItem(scrapy.Item):
-    url = scrapy.Field()
-    title = scrapy.Field()
-    img = scrapy.Field()
-    year = scrapy.Field()
-    number = scrapy.Field()
-    articleList = scrapy.Field()
-    pass
