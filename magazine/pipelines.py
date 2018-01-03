@@ -1,11 +1,18 @@
-# -*- coding: utf-8 -*-
+import pymongo
 
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
+from scrapy.conf import settings
 
+class MongoDBPipeline(object):
 
-class MagazinePipeline(object):
+    def __init__(self):
+        self.client = pymongo.MongoClient(host=settings['MONGODB_SERVER'], port=settings['MONGODB_PORT'])
+        # self.client.admin.authenticate(settings['MINGO_USER'], settings['MONGO_PSW'])
+        self.db = self.client[settings['MONGODB_DB']]
+        self.coll = self.db[settings['MONGODB_COLLECTION']]
+
     def process_item(self, item, spider):
-        return item
+        isExist = self.coll.find_one(item)
+        if isExist is None:
+            postItem = dict(item)
+            self.coll.insert(postItem)
+            return item
