@@ -24,6 +24,22 @@ class BookItem(scrapy.Item):
     book_url = scrapy.Field()
     book_url_md5 = scrapy.Field()
     pass
+class TagItem(scrapy.Item):
+    magazine_id = scrapy.Field()
+    tag_name = scrapy.Field()
+    tag_name_md5 = scrapy.Field()
+    pass
+class ContetItem(scrapy.Item):
+    book_id = scrapy.Field()
+    tag_id = scrapy.Field()
+    cont_sno = scrapy.Field()
+    cont_title = scrapy.Field()
+    cont_author = scrapy.Field()
+    cont_source = scrapy.Field()
+    cont_detail = scrapy.Field()
+    cont_url = scrapy.Field()
+    cont_url_md5 = scrapy.Field()
+    pass
 class ArticleItem(MagazineItem):
     title = scrapy.Field()
     author = scrapy.Field()

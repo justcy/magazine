@@ -1,54 +1,49 @@
 import scrapy
 import hashlib
 import re
-from magazine.items import BookItem
+from magazine.items import ContetItem
 
 from scrapy.http import Request
 
 
 class DzwzzzSpider(scrapy.Spider):
-    name = "dzwzzz"
+    name = "dzwzzz_details"
     allowed_domain = ['www.dzwzzz.com']
     custom_settings = {
         'ITEM_PIPELINES': {
-            'magazine.dzwzzzPipelines.MysqlPipeline': 300,
+            'magazine.dzwzzzPipelines.ContentPipeline': 300,
         }
     }
     def start_requests(self):
         urls = [
-            'https://www.dzwzzz.com/',
+            'https://www.dzwzzz.com/2018_19/index.html',
         ]
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        for book in response.xpath('//td[@class="time"]/a/@href').extract():
+        for book in response.xpath('//dd/span/a/@href').extract():
             yield response.follow(book, self.parse_book)
 
     def parse_book(self, response):
-        book = BookItem()
+        content = ContetItem()
+        content['book_id'] = 1
+        content['tag_id'] = 1
+        content['cont_url'] = response.url
+        content['cont_title'] = response.xpath('//h1/text()').extract()[0]
+        contentList = response.xpath('//div[@id="smalllist"]/div/span/a/text()').extract()
 
-        book['magazine_id']  = 1
-        book['book_url'] = response.url
-        book['book_name'] =response.xpath('//h1/text()').extract()[0]
-        cover = response.xpath('//div[@class="sidebar"]/div/img/@src').extract()
-        if len(cover) == 0:
-            cover = response.xpath('//div[@id="content"]/div/div/img/@src').extract()[0]
-            book['book_cover'] = self.allowed_domain[0]+"/"+cover
-        else:
-            book['book_cover'] = cover[0].replace('..', self.allowed_domain[0])
+        pattern = re.compile(ur'\d{2}\.')
+        snoList = pattern.findall(content['cont_url'])
+        content['cont_sno'] = snoList[0].replace('.','')
+        content['cont_author'] =response.xpath('//span[@id="pub_date"]/text()').extract()[0].replace("\n", " ").replace("\r", " ")
+        content['cont_source'] =response.xpath('//span[@id="media_name"]/text()').extract()[0].replace("\n", " ").replace("\r", " ")
+        content['cont_detail'] =response.xpath('//div[@class="blkContainerSblkCon"]/p').extract()
 
-        pattern = re.compile(ur'(\d{4})')
-        year = pattern.findall(book['book_url'])
-        book['book_year'] = year[0]
-        pattern = re.compile(ur'_\d{2}')
-        sno = pattern.findall(book['book_url'])
-        book['book_sno'] = sno[0].replace('_','')
-
-        bookUrlMd5 = hashlib.md5()
-        bookUrlMd5.update(book['book_url'])
-        book['book_url_md5'] = bookUrlMd5.hexdigest()
-        yield book
+        contUrlMd5 = hashlib.md5()
+        contUrlMd5.update(content['cont_url'])
+        content['cont_url_md5'] = contUrlMd5.hexdigest()
+        yield content
 
     #     book['url'] = response.url
     #     title = response.xpath('//h1/text()').extract()

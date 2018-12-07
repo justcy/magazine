@@ -73,6 +73,14 @@ MONGODB_DB = 'ssq'
 MONGODB_COLLECTION = 'records'
 
 REDIS_URL = 'redis://127.0.0.1:6379'
+
+
+MYSQL_HOST = 'www.58ajp.com'
+MYSQL_PORT = 3306
+MYSQL_DATABASE = 'magazine'
+MYSQL_USER = 'root'
+MYSQL_PASSWORD = 'FmODJhqZAzigvV%Wjp$1nkVknL9uq2HcV!f!O6Zl'
+
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
 #AUTOTHROTTLE_ENABLED = True
