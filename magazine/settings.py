@@ -65,12 +65,14 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'magazine.pipelines.MongoDBPipeline': 300,
+   'magazine.pipelines.JsonWriterPipeline': 300,
 }
 MONGODB_SERVER = 'localhost'
 MONGODB_PORT = 27017
 MONGODB_DB = 'ssq'
 MONGODB_COLLECTION = 'records'
+
+REDIS_URL = 'redis://127.0.0.1:6379'
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
 #AUTOTHROTTLE_ENABLED = True
