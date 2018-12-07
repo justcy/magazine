@@ -1,10 +1,8 @@
-import pymongo
-import json
 import pymysql
-from pymysql import connections
+import redis
 
 from scrapy.conf import settings
-class MysqlPipeline(object):
+class MagazinePipeline(object):
     def __init__(self):
         self.conn = pymysql.connect(host=settings['MYSQL_HOST'],user=settings['MYSQL_USER'],passwd=settings['MYSQL_PASSWORD'],db =settings['MYSQL_DATABASE'])
         self.cursor = self.conn.cursor()
@@ -19,6 +17,11 @@ class MysqlPipeline(object):
         sql ="insert into mg_book(magazine_id,book_name,book_cover,book_year,book_sno,book_url,book_url_md5) VALUES(%s,%s,%s,%s,%s,%s,%s)"
         self.cursor.execute(sql,(magazine_id,book_name,book_cover,book_year,book_sno,book_url,book_url_md5))
         self.conn.commit()
+
+        r = redis.Redis(host=settings['REDIS_HOST'], port=settings['REDIS_PORT'])
+        r.set(book_url_md5,self.cursor.lastrowid,7200)
+        r.lpush("redis_dzwzzz_details:start_urls",book_url)
+        r.lpush("redis_dzwzzz_tags:start_urls", book_url)
         return item
     def close_spider(self,spider):
         self.conn.close()

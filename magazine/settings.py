@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 
+
+# Enables scheduling storing requests queue in redis.
+SCHEDULER = "scrapy_redis.scheduler.Scheduler"
+
+# Ensure all spiders share same duplicates filter through redis.
+DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
+
 # Scrapy settings for magazine project
 #
 # For simplicity, this file contains only settings considered important or
@@ -66,13 +73,16 @@ ROBOTSTXT_OBEY = False
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    'magazine.pipelines.JsonWriterPipeline': 300,
+   'scrapy_redis.pipelines.RedisPipeline': 300,
+   'magazine.dzwzzzPipelines.TagPipeline': 300,
 }
 MONGODB_SERVER = 'localhost'
 MONGODB_PORT = 27017
 MONGODB_DB = 'ssq'
 MONGODB_COLLECTION = 'records'
 
-REDIS_URL = 'redis://127.0.0.1:6379'
+REDIS_HOST = '127.0.0.1'
+REDIS_PORT = '6379'
 
 
 MYSQL_HOST = 'www.58ajp.com'

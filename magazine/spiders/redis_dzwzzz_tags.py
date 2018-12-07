@@ -1,21 +1,11 @@
-import scrapy
 import hashlib
 from magazine.items import TagItem
+from scrapy_redis.spiders import RedisSpider
 
-class DzwzzzTagSpider(scrapy.Spider):
-    name = "dzwzzz_tags"
+
+class RedisDzwzzzTagSpider(RedisSpider):
+    name = "redis_dzwzzz_tags"
     allowed_domain = ['www.dzwzzz.com']
-    custom_settings = {
-        'ITEM_PIPELINES': {
-            'magazine.dzwzzzPipelines.TagPipeline': 300,
-        }
-    }
-    def start_requests(self):
-        urls = [
-            'https://www.dzwzzz.com/2018_21/index.html',
-        ]
-        for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
         tagItem = TagItem()
