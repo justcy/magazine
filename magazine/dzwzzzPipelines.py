@@ -44,7 +44,8 @@ class ContentPipeline(object):
         self.conn = pymysql.connect(host=settings['MYSQL_HOST'],user=settings['MYSQL_USER'],passwd=settings['MYSQL_PASSWORD'],db =settings['MYSQL_DATABASE'])
         self.cursor = self.conn.cursor()
     def process_item(self, item, spider):
-        book_id = item['book_id']
+        r = redis.Redis(host=settings['REDIS_HOST'], port=settings['REDIS_PORT'])
+        book_id = r.get(item['book_id'])
         tag_id = item['tag_id']
         cont_url = item['cont_url']
         cont_title = item['cont_title'].strip()
