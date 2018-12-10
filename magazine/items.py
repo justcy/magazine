@@ -30,8 +30,10 @@ class TagItem(scrapy.Item):
     tag_name_md5 = scrapy.Field()
     pass
 class ContetItem(scrapy.Item):
+    magazine_id = scrapy.Field()
     book_id = scrapy.Field()
     tag_id = scrapy.Field()
+    tag_name_md5 = scrapy.Field()
     cont_sno = scrapy.Field()
     cont_title = scrapy.Field()
     cont_author = scrapy.Field()

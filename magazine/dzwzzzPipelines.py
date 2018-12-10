@@ -21,7 +21,6 @@ class MagazinePipeline(object):
         r = redis.Redis(host=settings['REDIS_HOST'], port=settings['REDIS_PORT'])
         r.set(book_url_md5,self.cursor.lastrowid,7200)
         r.lpush("redis_dzwzzz_details:start_urls",book_url)
-        r.lpush("redis_dzwzzz_tags:start_urls", book_url)
         return item
     def close_spider(self,spider):
         self.conn.close()
@@ -46,7 +45,8 @@ class ContentPipeline(object):
     def process_item(self, item, spider):
         r = redis.Redis(host=settings['REDIS_HOST'], port=settings['REDIS_PORT'])
         book_id = r.get(item['book_id'])
-        tag_id = item['tag_id']
+        tag = {"magazine_id": item['magazine_id'],"tag_name": item['tag_id'],"tag_name_md5": item['tag_name_md5']}
+        tag_id = self.getTagId(tag)
         cont_url = item['cont_url']
         cont_title = item['cont_title'].strip()
         cont_sno = item['cont_sno']
@@ -61,3 +61,17 @@ class ContentPipeline(object):
         return item
     def close_spider(self,spider):
         self.conn.close()
+    def getTagId(self,tag):
+        magazine_id = tag['magazine_id']
+        tag_name = tag['tag_name']
+        tag_name_md5 = tag['tag_name_md5']
+        sql = "SELECT * FROM mg_tag WHERE tag_name_md5 = %s"
+        self.cursor.execute(sql,tag_name_md5)
+        oldTag = self.cursor.fetchone()
+        if oldTag:
+            return oldTag[0]
+        else:
+            sql = "insert into mg_tag(magazine_id,tag_name,tag_name_md5) VALUES(%s,%s,%s)"
+            self.cursor.execute(sql, (magazine_id, tag_name, tag_name_md5))
+            self.conn.commit()
+            return self.cursor.lastrowid

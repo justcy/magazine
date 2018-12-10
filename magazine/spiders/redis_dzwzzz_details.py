@@ -1,8 +1,10 @@
 import scrapy
 import hashlib
 import re
+import os
 from magazine.items import ContetItem
 from scrapy_redis.spiders import RedisSpider
+from scrapy.utils.response import get_base_url
 
 
 class RedisDzwzzzDetailsSpider(RedisSpider):
@@ -15,9 +17,15 @@ class RedisDzwzzzDetailsSpider(RedisSpider):
     }
 
     def parse(self, response):
-        meta={"url":response.url}
-        for book in response.xpath('//dd/span/a/@href').extract():
+        meta = {"url": response.url}
+
+        contentList = response.xpath('//dd/span/a/@href').extract()
+        if len(contentList) == 0:
+            contentList = response.xpath('//td/a/@href').extract();
+        for book in contentList:
             yield response.follow(book, self.parse_book, meta=meta)
+    def reverse(self,string):
+        return string[::-1]
 
     def parse_book(self, response):
         bookUrl = response.meta['url']
@@ -26,17 +34,29 @@ class RedisDzwzzzDetailsSpider(RedisSpider):
         bookUrlMd5 = hashlib.md5()
         bookUrlMd5.update(bookUrl)
         content['book_id'] = bookUrlMd5.hexdigest()
-        content['tag_id'] = 1
+        content['magazine_id'] = 1
+        tag = response.xpath('//div[@class="showList"]/h2/text()').extract()
+        if len(tag) == 0:
+            content['tag_id'] = response.xpath('//div[@class="openlist"]/span/text()').extract()[0];
+        else:
+            content['tag_id'] = tag[0]
+        tagNameMd5 = hashlib.md5()
+        tagNameMd5.update(content['tag_id'])
+        content['tag_name_md5'] = tagNameMd5.hexdigest()
+
         content['cont_url'] = response.url
         content['cont_title'] = response.xpath('//h1/text()').extract()[0]
         contentList = response.xpath('//div[@id="smalllist"]/div/span/a/text()').extract()
 
-        pattern = re.compile(ur'\d{2}\.')
-        snoList = pattern.findall(content['cont_url'])
-        content['cont_sno'] = snoList[0].replace('.', '')
-        content['cont_author'] = response.xpath('//span[@id="pub_date"]/text()').extract()[0].replace("\n",
-                                                                                                      " ").replace("\r",
-                                                                                                                   " ")
+        menuList = response.xpath('//div[@class="sidebarBlock menuLayer"]/div/div/a/@href').extract()
+        if len(menuList) == 0:
+            menuList = response.xpath('//div[@id="smalllist"]/div/span/a/@href').extract()
+
+        nowUrl = response.url[response.url.rfind('/',1)+1:]
+
+        content['cont_sno'] = menuList.index(nowUrl) + 1
+
+        content['cont_author'] = response.xpath('//span[@id="pub_date"]/text()').extract()[0].replace("\n"," ").replace("\r"," ")
         content['cont_source'] = response.xpath('//span[@id="media_name"]/text()').extract()[0].replace("\n",
                                                                                                         " ").replace(
             "\r", " ")
