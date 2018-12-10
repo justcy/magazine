@@ -24,8 +24,6 @@ class RedisDzwzzzDetailsSpider(RedisSpider):
             contentList = response.xpath('//td/a/@href').extract();
         for book in contentList:
             yield response.follow(book, self.parse_book, meta=meta)
-    def reverse(self,string):
-        return string[::-1]
 
     def parse_book(self, response):
         bookUrl = response.meta['url']
@@ -46,20 +44,29 @@ class RedisDzwzzzDetailsSpider(RedisSpider):
 
         content['cont_url'] = response.url
         content['cont_title'] = response.xpath('//h1/text()').extract()[0]
-        contentList = response.xpath('//div[@id="smalllist"]/div/span/a/text()').extract()
 
         menuList = response.xpath('//div[@class="sidebarBlock menuLayer"]/div/div/a/@href').extract()
         if len(menuList) == 0:
             menuList = response.xpath('//div[@id="smalllist"]/div/span/a/@href').extract()
 
-        nowUrl = response.url[response.url.rfind('/',1)+1:]
+        nowUrl = response.url[response.url.rfind('/', 1) + 1:]
 
         content['cont_sno'] = menuList.index(nowUrl) + 1
 
-        content['cont_author'] = response.xpath('//span[@id="pub_date"]/text()').extract()[0].replace("\n"," ").replace("\r"," ")
-        content['cont_source'] = response.xpath('//span[@id="media_name"]/text()').extract()[0].replace("\n",
-                                                                                                        " ").replace(
-            "\r", " ")
+        newTypeAuther = response.xpath('//span[@id="pub_date"]/text()').extract()
+        if len(newTypeAuther) == 0 :
+            print response.xpath('//div[@class="title tcright"]/text()').extract()[0].replace("\n", " ").replace("\r", " ")
+            autherSource = response.xpath('//div[@class="title tcright"]/text()').extract()[0].replace("\n", " ").replace("\r", " ").split(u'\xa0\xa0\xa0\xa0')
+            print autherSource
+
+            auther = autherSource[0]
+            soutrce = autherSource[1]
+        else:
+            auther = response.xpath('//span[@id="pub_date"]/text()').extract()[0].replace("\n", " ").replace("\r", " ")
+            soutrce = response.xpath('//span[@id="media_name"]/text()').extract()[0].replace("\n", " ").replace("\r",
+                                                                                                                " ")
+        content['cont_author'] = auther
+        content['cont_source'] = soutrce
         content['cont_detail'] = response.xpath('//div[@class="blkContainerSblkCon"]/p').extract()
 
         contUrlMd5 = hashlib.md5()
